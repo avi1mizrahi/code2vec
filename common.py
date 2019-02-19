@@ -1,6 +1,5 @@
+import pickle
 import re
-import json
-import sys
 from enum import Enum
 
 
@@ -51,6 +50,7 @@ class Config:
         self.RELEASE = False
         self.EXPORT_CODE_VECTORS = False
 
+
 class common:
     noSuchWord = "NoSuchWord"
 
@@ -61,6 +61,50 @@ class common:
             return word.lower()
         else:
             return stripped.lower()
+
+    @staticmethod
+    def save_dictionaries(dataset_name, word_to_count, path_to_count, target_to_count,
+                          num_training_examples):
+        save_dict_file_path = '{}.dict.c2v'.format(dataset_name)
+        with open(save_dict_file_path, 'wb') as file:
+            pickle.dump(word_to_count, file)
+            pickle.dump(path_to_count, file)
+            pickle.dump(target_to_count, file)
+            pickle.dump(num_training_examples, file)
+            print('Dictionaries saved to: {}'.format(save_dict_file_path))
+
+    @staticmethod
+    def load_dictionaries(dataset_name):
+        dict_file_path = '{}.dict.c2v'.format(dataset_name)
+        with open(dict_file_path, 'rb') as file:
+            word_to_count = pickle.load(file)
+            path_to_count = pickle.load(file)
+            target_to_count = pickle.load(file)
+            num_training_examples = pickle.load(file)
+            print('Dictionaries loaded.')
+
+        return word_to_count, path_to_count, target_to_count, num_training_examples
+
+    @staticmethod
+    def merge_dictionaries(dicts_name_list, output_name):
+        from collections import Counter
+        word_to_count = Counter()
+        path_to_count = Counter()
+        target_to_count = Counter()
+        num_training_examples = 0
+
+        for dicts_name in dicts_name_list:
+            wc, pc, tc, num = common.load_dictionaries(dicts_name)
+            word_to_count += Counter(wc)
+            path_to_count += Counter(pc)
+            target_to_count += Counter(tc)
+            num_training_examples += num
+
+        common.save_dictionaries(output_name,
+                                 word_to_count=dict(word_to_count),
+                                 path_to_count=dict(path_to_count),
+                                 target_to_count=dict(target_to_count),
+                                 num_training_examples=num_training_examples)
 
     @staticmethod
     def _load_vocab_from_histogram(path, min_count=0, start_from=0, return_counts=False):

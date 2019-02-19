@@ -1,7 +1,6 @@
 import random
 from argparse import ArgumentParser
 import common
-import pickle
 
 '''
 This script preprocesses the data from MethodPaths. It truncates methods with too many contexts,
@@ -9,17 +8,6 @@ and pads methods with less paths with spaces.
 '''
 
 
-def save_dictionaries(dataset_name, word_to_count, path_to_count, target_to_count,
-                      num_training_examples):
-    save_dict_file_path = '{}.dict.c2v'.format(dataset_name)
-    with open(save_dict_file_path, 'wb') as file:
-        pickle.dump(word_to_count, file)
-        pickle.dump(path_to_count, file)
-        pickle.dump(target_to_count, file)
-        pickle.dump(num_training_examples, file)
-        print('Dictionaries saved to: {}'.format(save_dict_file_path))
-
- 
 def process_file(file_path, data_file_role, dataset_name, word_to_count, path_to_count, max_contexts):
     sum_total = 0
     sum_sampled = 0
@@ -136,6 +124,8 @@ if __name__ == '__main__':
         if data_role == 'train':
             num_training_examples = num_examples
 
-    save_dictionaries(dataset_name=args.output_name, word_to_count=word_to_count,
-                      path_to_count=path_to_count, target_to_count=target_to_count,
-                      num_training_examples=num_training_examples)
+    common.common.save_dictionaries(dataset_name=args.output_name,
+                                    word_to_count=word_to_count,
+                                    path_to_count=path_to_count,
+                                    target_to_count=target_to_count,
+                                    num_training_examples=num_training_examples)
